@@ -24,7 +24,8 @@ class MainController extends AbstractController
     {
         // dd($req);
         return $this->render('main/hello.html.twig', [
-            'nom' => $name
+            'nom' => $name,
+            'path' => '   '
         ]);
     }
 }
