@@ -1,0 +1,14 @@
+{% extends 'heritage.html.twig' %}
+
+{% block titreDoc %}
+Nouveau Titre
+{% endblock %}
+
+{% block corpDuDoc %}
+{{
+        parent()
+    }}
+<ol>
+    <li>Nouveau contenu</li>
+</ol>
+{% endblock %}
