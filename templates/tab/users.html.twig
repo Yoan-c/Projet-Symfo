@@ -12,6 +12,11 @@ Users
 
 {% block body %}
 {{ include('fragments/date-jour.html.twig')}}
+
+<div class="alert alert-warning">
+    <a href="{{ path('tab', {nb : 7}) }}"> Stats Table</a>
+</div>
+
 <table class="table">
     <tr class="table-active">
         <td>Firstname</td>
