@@ -11,17 +11,23 @@ Users
 
 
 {% block body %}
+{{ include('fragments/date-jour.html.twig')}}
 <table class="table">
     <tr class="table-active">
         <td>Firstname</td>
         <td>name</td>
         <td>age</td>
+        <td>message</td>
     </tr>
     {% for user in users %}
     <tr class="table-{% if loop.index is odd %}danger{% else %}warning{% endif %}">
         <td>{{ user.firstname }}</td>
         <td>{{ user.name }}</td>
         <td>{{ user.age }}</td>
+        <td>
+            {{ render(controller('App\\Controller\\MainController::hello', {name : user.firstname} )) }}
+        </td>
+
     </tr>
     {% endfor %}
 </table>

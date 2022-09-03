@@ -19,7 +19,7 @@ class MainController extends AbstractController
         ]);
     }
 
-    #[Route('/hello/{name}', name: 'hello')]
+    //  #[Route('/hello/{name}', name: 'hello')]
     public function hello(Request $req, $name): Response
     {
         // dd($req);
