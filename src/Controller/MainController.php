@@ -28,4 +28,11 @@ class MainController extends AbstractController
             'path' => '   '
         ]);
     }
+
+    #[Route('/template', name: 'temp')]
+    public function temp(): Response
+    {
+        // dd($req);
+        return $this->render('template.html.twig');
+    }
 }
