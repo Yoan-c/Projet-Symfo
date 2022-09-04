@@ -7,20 +7,20 @@ use App\Form\PersonneType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/personne')]
 class PersonneController extends AbstractController
 {
-    //#[Route('/', name: 'list_personne')]
+    #[Route('/', name: 'list_personne')]
     public function index(ManagerRegistry $doctrine): Response
     {
         $repository = $doctrine->getRepository(Personne::class);
         $personnes = $repository->findAll();
         return $this->render('personne/index.html.twig', [
-            'personnes' => $personnes,
-            'isPaginated' => true,
+            'personnes' => $personnes
         ]);
     }
 
@@ -81,16 +81,29 @@ class PersonneController extends AbstractController
     }
 
     #[Route('/add', name: 'add_personne')]
-    public function addPersonne(ManagerRegistry $doctrine): Response
+    public function addPersonne(ManagerRegistry $doctrine,  Request $req): Response
     {
-        $entityManager = $doctrine->getManager();
+
         $personne = new Personne();
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove("createdAt");
         $form->remove("updatedAt");
-        return $this->render('personne/add-personne.html.twig', [
-            'varform' => $form->createView()
-        ]);
+        // mon formulaire va aller traiter la requete
+        $form->handleRequest($req);
+
+        if ($form->isSubmitted()) {
+            // formulaire nom + prenom + message  juste un msg faire  $form->getData(); 
+            $manager = $doctrine->getManager();
+            $manager->persist($personne);
+            $manager->flush();
+            $this->addFlash('success', $personne->getName() . " a été ajouté avec success");
+            return $this->redirectToRoute("all_personne");
+        } else {
+
+            return $this->render('personne/add-personne.html.twig', [
+                'varform' => $form->createView()
+            ]);
+        }
     }
 
     #[Route('/delete/{id}', name: "del_personne")]
