@@ -80,15 +80,16 @@ class PersonneController extends AbstractController
         ]);
     }
 
-    #[Route('/add', name: 'add_personne')]
-    public function addPersonne(ManagerRegistry $doctrine,  Request $req): Response
+    #[Route('/edit/{id?0}', name: 'edit_personne')]
+    public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine,  Request $req): Response
     {
-
-        $personne = new Personne();
+        if (!$personne)
+            $personne = new Personne();
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove("createdAt");
         $form->remove("updatedAt");
         // mon formulaire va aller traiter la requete
+        // ca permet d'associer toute la requete au formulaire (les champs etc...)
         $form->handleRequest($req);
 
         if ($form->isSubmitted()) {

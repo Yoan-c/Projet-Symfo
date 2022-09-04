@@ -12,6 +12,7 @@
             <p class="card-text">Age : {{ personne.age }}.</p>
             <a href="{{ path('detail_personne', {id: personne.id})}}" class="card-link">Détails</a>
             <a href="{{ path('del_personne', {id: personne.id})}}" class="card-link">suppression</a>
+            <a href="{{ path('edit_personne', {id: personne.id})}}" class="card-link">Editer</a>
         </div>
     </div>
     {% endfor %}
