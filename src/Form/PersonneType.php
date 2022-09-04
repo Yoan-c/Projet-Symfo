@@ -2,11 +2,15 @@
 
 namespace App\Form;
 
+use App\Entity\Hobby;
 use App\Entity\Personne;
+use App\Entity\Profile;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Doctrine\ORM\EntityRepository;
 
 class PersonneType extends AbstractType
 {
@@ -18,8 +22,20 @@ class PersonneType extends AbstractType
             ->add('age')
             ->add('createdAt')
             ->add('updatedAt')
-            ->add('profile')
-            ->add('hobbies')
+            ->add('profile', EntityType::class, [
+                'expanded' => true,
+                "multiple" => false,
+                'class' => Profile::class,
+            ])
+            ->add('hobbies', EntityType::class, [
+                'expanded' => false,
+                "multiple" => true,
+                'class' => Hobby::class,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('h')
+                        ->orderBy('h.designation', 'ASC');
+                },
+            ])
             ->add('job')
             ->add("editer", SubmitType::class);
     }
