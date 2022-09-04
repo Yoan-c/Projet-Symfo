@@ -1,0 +1,12 @@
+{% extends 'template.html.twig' %}
+
+{% block title %}Stats{% endblock %}
+
+{% block body %}
+{{ form_start(varform) }}
+<div class="row">
+    <div class="col">{{ form_row(varform.firstname)}}</div>
+    <div class="col">{{ form_row(varform.name)}}</div>
+</div>
+{{ form_rest(varform) }}
+{% endblock %}
