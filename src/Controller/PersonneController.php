@@ -5,13 +5,14 @@ namespace App\Controller;
 use App\Entity\Personne;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/personne')]
 class PersonneController extends AbstractController
 {
-    #[Route('/', name: 'list_personne')]
+    //#[Route('/', name: 'list_personne')]
     public function index(ManagerRegistry $doctrine): Response
     {
         $repository = $doctrine->getRepository(Personne::class);
@@ -49,7 +50,7 @@ class PersonneController extends AbstractController
         if (!$personne) {
             // $this->addFlash('error', "La personne d'id $id n'existe pas");
             $this->addFlash('error', "La personne n'existe pas");
-            return $this->redirectToRoute('list_personne');
+            return $this->redirectToRoute('all_personne');
         }
         return $this->render('personne/detail.html.twig', [
             'personne' => $personne
@@ -80,5 +81,21 @@ class PersonneController extends AbstractController
         return $this->render('personne/detail.html.twig', [
             'personne' => $personne
         ]);
+    }
+
+    #[Route('/delete/{id}', name: "del_personne")]
+    public function deletePersonne(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
+    {
+        if ($personne) {
+            $manager = $doctrine->getManager();
+            // ajoute la suppression dans la transaction
+            $manager->remove($personne);
+            // execute la transaction (suppression au niveau de la BDD)
+            $manager->flush();
+            $this->addFlash('success', "La personne a été supprimé");
+        } else {
+            $this->addFlash('error', "La personne n'existe pas");
+        }
+        return $this->redirectToRoute("all_personne");
     }
 }
