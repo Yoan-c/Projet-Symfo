@@ -98,4 +98,21 @@ class PersonneController extends AbstractController
         }
         return $this->redirectToRoute("all_personne");
     }
+
+    #[Route('/update/{id}/{name}/{firstname}/{age}', name: 'update_personne')]
+    public function updatePesonne(Personne $personne = null,  ManagerRegistry $doctrine, $name, $firstname, $age)
+    {
+        if ($personne) {
+            $personne->setName($name);
+            $personne->setFirstname($firstname);
+            $personne->setAge($age);
+            $manager = $doctrine->getManager();
+            $manager->persist($personne);
+            $manager->flush();
+            $this->addFlash('success', "La personne a été mis à jour avec success");
+        } else {
+            $this->addFlash('error', "La personne n'existe pas");
+        }
+        return $this->redirectToRoute("all_personne");
+    }
 }
