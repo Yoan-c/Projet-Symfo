@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Personne;
 use App\Form\PersonneType;
 use App\Service\Helpers;
+use App\Service\PdfService;
 use App\Service\UploaderService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -89,6 +90,13 @@ class PersonneController extends AbstractController
         ]);
     }
 
+    #[Route('/pdf/{id}', name: 'pdf_personne')]
+    public function generatePdf(Personne $personne = null, PdfService $pdf)
+    {
+        $html = $this->render('personne/detail.html.twig', ['personne' => $personne]);
+        $pdf->showPdfFile($html);
+    }
+
     #[Route('/edit/{id?0}', name: 'edit_personne')]
     public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine,  Request $req, UploaderService $uploader): Response
     {
@@ -116,13 +124,10 @@ class PersonneController extends AbstractController
                 // instead of its contents
                 $personne->setImage($uploader->uploadFile($photo, $directory));
             }
-
-
-
-
             $manager->persist($personne);
             $manager->flush();
             $this->addFlash('success', $personne->getName() . " a été ajouté avec success");
+
             return $this->redirectToRoute("all_personne");
         } else {
 
