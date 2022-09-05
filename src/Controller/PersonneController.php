@@ -94,7 +94,7 @@ class PersonneController extends AbstractController
         // ca permet d'associer toute la requete au formulaire (les champs etc...)
         $form->handleRequest($req);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // formulaire nom + prenom + message  juste un msg faire  $form->getData(); 
             $manager = $doctrine->getManager();
 
