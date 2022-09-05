@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Personne;
+use App\Entity\User;
 use App\Form\PersonneType;
 use App\Service\Helpers;
+use App\Service\MailerService;
 use App\Service\PdfService;
 use App\Service\UploaderService;
 use Doctrine\Persistence\ManagerRegistry;
@@ -98,10 +100,18 @@ class PersonneController extends AbstractController
     }
 
     #[Route('/edit/{id?0}', name: 'edit_personne')]
-    public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine,  Request $req, UploaderService $uploader): Response
-    {
-        if (!$personne)
+    public function addPersonne(
+        Personne $personne = null,
+        ManagerRegistry $doctrine,
+        Request $req,
+        UploaderService $uploader,
+        MailerService $mailer
+    ): Response {
+        $new = false;
+        if (!$personne) {
             $personne = new Personne();
+            $new = true;
+        }
         $form = $this->createForm(PersonneType::class, $personne);
         $form->remove("createdAt");
         $form->remove("updatedAt");
@@ -124,10 +134,21 @@ class PersonneController extends AbstractController
                 // instead of its contents
                 $personne->setImage($uploader->uploadFile($photo, $directory));
             }
+
+            if ($new) {
+                $message = " a été ajouté avec succes";
+                // $user = new User();
+                // $user = $this->getUser();
+                $personne->setCreatedBy($this->getUser());
+            } else {
+                $message = " a été mis a jour avec success";
+            }
+            $mailMessage = $personne->getFirstname() . "" . $personne->getName() . '' . $message;
+            $mailer->sendEmail(content: $mailMessage);
             $manager->persist($personne);
             $manager->flush();
-            $this->addFlash('success', $personne->getName() . " a été ajouté avec success");
 
+            $this->addFlash('success', $personne->getName() . " " . $message);
             return $this->redirectToRoute("all_personne");
         } else {
 

@@ -12,12 +12,12 @@ class MailerService
     {
     }
     public function sendEmail(
-        $to = 'you@example.com',
+        $to = 'timetiss97200@gmail.com',
         $content = '<p>See Twig integration for better HTML integration!</p>',
         $subject = 'Time for Symfony Mailer!'
     ) {
         $email = (new Email())
-            ->from('hello@example.com')
+            ->from('timetiss97200@gmail.com')
             ->to($to)
             //->cc('cc@example.com')
             //->bcc('bcc@example.com')
