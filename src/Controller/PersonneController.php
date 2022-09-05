@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Personne;
 use App\Form\PersonneType;
+use App\Service\Helpers;
+use App\Service\UploaderService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -12,10 +14,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Psr\Log\LoggerInterface;
 
 #[Route('/personne')]
 class PersonneController extends AbstractController
 {
+    public function __construct(private LoggerInterface $logger, private Helpers $helpers)
+    {
+    }
     #[Route('/', name: 'list_personne')]
     public function index(ManagerRegistry $doctrine): Response
     {
@@ -51,6 +57,7 @@ class PersonneController extends AbstractController
     #[Route('/all/{page?1}/{nbr?12}', name: 'all_personne')]
     public function indexAll(ManagerRegistry $doctrine, $page, $nbr): Response
     {
+        echo ($this->helpers->sayCc());
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
         $nbPage = ceil($nbPersonne / $nbr);
@@ -83,7 +90,7 @@ class PersonneController extends AbstractController
     }
 
     #[Route('/edit/{id?0}', name: 'edit_personne')]
-    public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine,  Request $req, SluggerInterface $slugger): Response
+    public function addPersonne(Personne $personne = null, ManagerRegistry $doctrine,  Request $req, UploaderService $uploader): Response
     {
         if (!$personne)
             $personne = new Personne();
@@ -104,24 +111,10 @@ class PersonneController extends AbstractController
             // this condition is needed because the 'brochure' field is not required
             // so the image file must be processed only when a file is uploaded
             if ($photo) {
-                $originalFilename = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photo->guessExtension();
-
-                // Move the file to the directory where brochures are stored
-                try {
-                    $photo->move(
-                        $this->getParameter('personnes_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
-                }
-
+                $directory = $this->getParameter('personnes_directory');
                 // updates the 'brochureFilename' property to store the PDF file name
                 // instead of its contents
-                $personne->setImage($newFilename);
+                $personne->setImage($uploader->uploadFile($photo, $directory));
             }
 
 
