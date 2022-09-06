@@ -160,8 +160,7 @@ class PersonneController extends AbstractController
             } else {
                 $message = " a été mis a jour avec success";
             }
-            $mailMessage = $personne->getFirstname() . "" . $personne->getName() . '' . $message;
-            $mailer->sendEmail(content: $mailMessage);
+
             $manager->persist($personne);
             $manager->flush();
             if ($new) {
