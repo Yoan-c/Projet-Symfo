@@ -22,3 +22,20 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\EventListener\PersonneListener:
+        tags:
+            - {
+                name : kernel.event_listener,
+                event: personne.add,
+                method: onnAddPersonneListener 
+            }
+            - {
+                name : kernel.event_listener,
+                event : personne.list_all
+            }
+            - {
+                name : kernel.event_listener,
+                event : personne.list_all,
+                method: onPersonneListAll2,
+                priority : 100
+            }

@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Personne;
 use App\Entity\User;
+use App\Event\AddPersonneEvent;
+use App\Event\ListAllPersonneEvent;
 use App\Form\PersonneType;
 use App\Service\Helpers;
 use App\Service\MailerService;
@@ -19,6 +21,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 #[
     Route('/personne'),
@@ -26,8 +29,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 ]
 class PersonneController extends AbstractController
 {
-    public function __construct(private LoggerInterface $logger, private Helpers $helpers)
-    {
+    public function __construct(
+        private LoggerInterface $logger,
+        private Helpers $helpers,
+        private EventDispatcherInterface $dispatcher
+    ) {
     }
     #[Route('/', name: 'list_personne')]
     public function index(ManagerRegistry $doctrine): Response
@@ -44,6 +50,7 @@ class PersonneController extends AbstractController
     {
         $repository = $doctrine->getRepository(Personne::class);
         $personnes = $repository->findPersonneByAgeInterval($ageMin, $ageMax);
+
         return $this->render('personne/index.html.twig', [
             'personnes' => $personnes,
         ]);
@@ -72,6 +79,8 @@ class PersonneController extends AbstractController
         $nbPersonne = $repository->count([]);
         $nbPage = ceil($nbPersonne / $nbr);
         $personnes = $repository->findBy([], [], $nbr, ($page - 1) * $nbr);
+        $listAllPersonneEvent = new ListAllPersonneEvent(count($personnes));
+        $this->dispatcher->dispatch($listAllPersonneEvent, ListAllPersonneEvent::LIST_ALL_PERSONNE_EVENT);
         return $this->render('personne/index.html.twig', [
             'personnes' => $personnes,
             'isPaginated' => true,
@@ -155,7 +164,12 @@ class PersonneController extends AbstractController
             $mailer->sendEmail(content: $mailMessage);
             $manager->persist($personne);
             $manager->flush();
-
+            if ($new) {
+                // on a crée notre evenement 
+                $addPersonneEvent = new AddPersonneEvent($personne);
+                // on va maintenant le dispatcher
+                $this->dispatcher->dispatch($addPersonneEvent, AddPersonneEvent::ADD_PERSONNE_EVENT);
+            }
             $this->addFlash('success', $personne->getName() . " " . $message);
             return $this->redirectToRoute("all_personne");
         } else {
