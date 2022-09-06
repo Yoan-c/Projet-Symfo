@@ -19,6 +19,7 @@ class Helpers
     // Pour recupérer un utilisateur au sein d'un service ex pour envoyer un mail, ou pour un autre service etc...
     public function getUser(): User
     {
-        return $this->security->getUser();
+        if ($this->security->isGranted('ROLE_ADMIN'))
+            return $this->security->getUser();
     }
 }

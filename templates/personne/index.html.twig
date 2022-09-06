@@ -13,12 +13,14 @@
             <a href="{{ path('detail_personne', {id: personne.id})}}" class="card-link">
                 <i class="fa fa-asterisk" aria-hidden="true"></i>
             </a>
+            {% if is_granted('ROLE_ADMIN') %}
             <a href="{{ path('del_personne', {id: personne.id})}}" class="card-link">
                 <i class="fa fa-trash" aria-hidden="true"></i>
             </a>
             <a href="{{ path('edit_personne', {id: personne.id})}}" class="card-link">
                 <i class="fa fa-pencil" aria-hidden="true"></i>
             </a>
+            {% endif %}
         </div>
     </div>
     {% endfor %}

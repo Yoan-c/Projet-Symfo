@@ -18,8 +18,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Psr\Log\LoggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
-#[Route('/personne')]
+#[
+    Route('/personne'),
+    IsGranted('ROLE_USER')
+]
 class PersonneController extends AbstractController
 {
     public function __construct(private LoggerInterface $logger, private Helpers $helpers)
@@ -57,10 +61,13 @@ class PersonneController extends AbstractController
         ]);
     }
 
-    #[Route('/all/{page?1}/{nbr?12}', name: 'all_personne')]
+    #[
+        Route('/all/{page?1}/{nbr?12}', name: 'all_personne'),
+        IsGranted("ROLE_USER")
+    ]
     public function indexAll(ManagerRegistry $doctrine, $page, $nbr): Response
     {
-        echo ($this->helpers->sayCc());
+        // echo ($this->helpers->sayCc());
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
         $nbPage = ceil($nbPersonne / $nbr);
@@ -107,6 +114,7 @@ class PersonneController extends AbstractController
         UploaderService $uploader,
         MailerService $mailer
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $new = false;
         if (!$personne) {
             $personne = new Personne();
@@ -158,7 +166,10 @@ class PersonneController extends AbstractController
         }
     }
 
-    #[Route('/delete/{id}', name: "del_personne")]
+    #[
+        Route('/delete/{id}', name: "del_personne"),
+        IsGranted('ROLE_ADMIN')
+    ]
     public function deletePersonne(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
     {
         if ($personne) {
